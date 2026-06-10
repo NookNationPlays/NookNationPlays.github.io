@@ -236,8 +236,8 @@
                 <input type="checkbox" id="minigameToggle" />
                 <label for="minigameToggle"> Minigames</label>
             </div>
-            <div id="minigameOptionBox">
-                <div class="minigameOptionBoxRow">
+            <div id="minigameOptionsBox">
+                <div class="minigameOptionsBoxRow">
                     <a href="mini%20games/eaglercraft/188/index.html" class="switchII">
                         Minecraft 1.8.8
                     </a>
@@ -261,6 +261,18 @@
                     advancedOptionsBox.style.display = "block";
                 } else {
                     advancedOptionsBox.style.display = "none";
+                }
+            });
+
+             const minigameToggle = document.getElementById("minigameToggle");
+            const minigames = document.getElementById("minigames");
+            const minigameOptionsBox = document.getElementById("minigameOptionsBox");
+            minigameOptionsBox.style.display = "none";
+            minigameToggle.addEventListener("change", (event) => {
+                if (event.target.checked) {
+                    minigameOptionsBox.style.display = "block";
+                } else {
+                    minigameOptionsBox.style.display = "none";
                 }
             });
 
