@@ -1,30 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Eaglercraft Launcher</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eaglercraft 1.8.8</title>
+  <style>
+    /* Reset styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Target Launch Button */
+    #open-btn {
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #5b8731; /* Minecraft green */
+      border: 3px solid #3c5e1f;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: background 0.2s;
+    }
+
+    #open-btn:hover {
+      background-color: #6da23b;
+    }
+
+    /* Hidden Utility Class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Popout overlay covering everything */
+    #popout-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Control header bar */
+    .popout-header {
+      background: #111;
+      padding: 8px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #333;
+    }
+
+    .game-title {
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    #close-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    #close-btn:hover {
+      background: #ff3333;
+    }
+
+    /* Fullscreen Game Canvas Frame */
+    #popout-iframe {
+      flex-grow: 1;
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 <body>
 
-    <button onclick="launchGame()">Launch Eaglercraft in Separate Window</button>
+  <!-- Launch Interface -->
+  <button id="open-btn">Launch Eaglercraft 1.8.8</button>
 
-    <script>
-        function launchGame() {
-            // Target URL
-            const url = 'https://nooknationplays.github.io/mini%20games/eaglercraft/188/index.html';
-            
-            // Define window configurations to force a separate popup window
-            const windowFeatures = 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no';
-            
-            // Open the game in a new window context
-            const gameWindow = window.open(url, 'EaglercraftWindow', windowFeatures);
-            
-            // Ensure the window opened successfully
-            if (!gameWindow) {
-                alert('Popup blocked! Please allow popups for this site.');
-            }
-        }
-    </script>
+  <!-- Popout Modal Viewport -->
+  <div id="popout-container" class="hidden">
+    <div class="popout-header">
+      <span class="game-title">Eaglercraft 1.8.8 — Click game window to capture mouse</span>
+      <button id="close-btn">✕ Close Game</button>
+    </div>
+    <!-- Explicit permissions for game controls and pointer locking -->
+    <iframe 
+      id="popout-iframe" 
+      src="" 
+      allow="pointer-lock; fullscreen; autoplay; gamepad;">
+    </iframe>
+  </div>
+
+  <script>
+    const openBtn = document.getElementById('open-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const container = document.getElementById('popout-container');
+    const iframe = document.getElementById('popout-iframe');
+    
+    // Target game URL 
+    const gameUrl = "nooknationplays.github.io/mini%20games/eaglercraft/188/index.html";
+
+    // Open game popout
+    openBtn.addEventListener('click', () => {
+      container.classList.remove('hidden');
+      iframe.src = gameUrl; // Load source on click to avoid background resource consumption
+      
+      // Attempt to auto-focus the frame so your first click locks the pointer
+      setTimeout(() => {
+        iframe.focus();
+      }, 500);
+    });
+
+    // Close game popout
+    closeBtn.addEventListener('click', () => {
+      container.classList.add('hidden');
+      iframe.src = ''; // Clear source to immediately kill audio, game state, and pointer lock
+    });
+  </script>
 
 </body>
 </html>
