@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eaglercraft Launcher</title>
+</head>
+<body>
+
+    <button onclick="launchGame()">Launch Eaglercraft in Separate Window</button>
+
+    <script>
+        function launchGame() {
+            // Target URL
+            const url = 'https://nooknationplays.github.io/mini%20games/eaglercraft/188/index.html';
+            
+            // Define window configurations to force a separate popup window
+            const windowFeatures = 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no';
+            
+            // Open the game in a new window context
+            const gameWindow = window.open(url, 'EaglercraftWindow', windowFeatures);
+            
+            // Ensure the window opened successfully
+            if (!gameWindow) {
+                alert('Popup blocked! Please allow popups for this site.');
+            }
+        }
+    </script>
+
+</body>
+</html>
