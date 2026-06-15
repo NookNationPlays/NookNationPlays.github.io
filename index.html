@@ -210,11 +210,79 @@
                 color: #ddd
             }
 
-            .logo {
-                width: 512px;
-                height: 137.5px;
-                filter: drop-shadow(0 0 8px red);
-            }
+@property --glow1 {
+    syntax: "<color>";
+    initial-value: red;
+    inherits: false;
+}
+
+@property --glow2 {
+    syntax: "<color>";
+    initial-value: blue;
+    inherits: false;
+}
+
+@property --glowBlur {
+    syntax: "<length>";
+    initial-value: 8px;
+    inherits: false;
+}
+
+.logo {
+    width: 512px;
+    height: 137.5px;
+
+    filter:
+        drop-shadow(0 0 var(--glowBlur) var(--glow1))
+        drop-shadow(0 0 calc(var(--glowBlur) * 1.5) var(--glow2));
+
+    animation: rainbowGlow 7s ease-in-out infinite;
+}
+
+/* smooth rainbow cycling */
+@keyframes rainbowGlow {
+    0% {
+        --glow1: #ff0000;
+        --glow2: #ff7a00;
+        --glowBlur: 8px;
+    }
+
+    16% {
+        --glow1: #ff7a00;
+        --glow2: #ffff00;
+        --glowBlur: 9px;
+    }
+
+    33% {
+        --glow1: #00ff00;
+        --glow2: #00ffff;
+        --glowBlur: 10px;
+    }
+
+    50% {
+        --glow1: #0080ff;
+        --glow2: #7a00ff;
+        --glowBlur: 11px;
+    }
+
+    66% {
+        --glow1: #ff00ff;
+        --glow2: #ff007a;
+        --glowBlur: 10px;
+    }
+
+    83% {
+        --glow1: #ff007a;
+        --glow2: #ff0000;
+        --glowBlur: 9px;
+    }
+
+    100% {
+        --glow1: #ff0000;
+        --glow2: #ff7a00;
+        --glowBlur: 8px;
+    }
+}
 .switchII {
     position: relative;
     display: inline-block;
