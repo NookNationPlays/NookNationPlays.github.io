@@ -351,6 +351,73 @@
         background-position: 300% 50%;
     }
 }
+            .switchIII {
+    position: relative;
+    display: inline-block;
+    padding: 10px 18px;
+
+    color: white;
+    font-family: nswui;
+    font-size: 14px;
+    text-decoration: none;
+
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5px;
+    border: none;
+
+    z-index: 1;
+}
+
+.switchIII::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+
+    /* smooth cyclic gradient (no harsh repeat point) */
+    background: linear-gradient(
+        90deg,
+        #5ddcff,
+        #3c67e3,
+        #4e00c2,
+        #3c67e3,
+        #5ddcff
+    );
+
+    background-size: 300% 100%;
+    background-position: 0% 50%;
+
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    z-index: -1;
+
+    animation: flow 8s linear infinite;
+}
+
+.switchIII::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    border-radius: inherit;
+
+    background: rgba(20, 20, 30, 0.95);
+
+    z-index: -1;
+}
+
+.switchIII:hover::before {
+    opacity: 1;
+}
+
+@keyframes flow {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 300% 50%;
+    }
+}
           #inputAdvanced {
     font-family: nswui;
     color: #aaa;
@@ -460,23 +527,23 @@
             </div>
             <div id="minigameOptionsBox">
                 <div class="minigameOptionsBoxRow">
-                    <a href="mini%20games/eaglercraft/188/EaglerFrameinit.html" class="switchII">
+                    <a href="mini%20games/eaglercraft/188/EaglerFrameinit.html" class="switchIII">
                         Minecraft 1.8.8
                     </a>
                 </div>
                  <div class="minigameOptionsBoxRow">
-                    <a href="mini%20games/cookie%20clicker/index.html" class="switchII">
+                    <a href="mini%20games/cookie%20clicker/index.html" class="switchIII">
                         Cookie Clicker
                     </a>
                 </div>
                 <div class="minigameOptionsBoxRow">
-                    <a href="mini%20games/blockblast/index.html" class="switchII">
+                    <a href="mini%20games/blockblast/index.html" class="switchIII">
                         Block Blast!
                     </a>
                 </div>
                 <div class="minigameOptionsBoxRow">
-                    <a href="mini%20games/dusk/shell.html" class="switchII">
-                        DuskLight
+                    <a href="mini%20games/dusk/shell.html" class="switchIII">
+                        Dusklight
                     </a>
                 </div>
             </div>
