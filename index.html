@@ -24,7 +24,7 @@
                 flex-direction: column;
             }
 
-            #box {
+#box {
     position: relative;
     color: #aaa;
 
@@ -210,7 +210,7 @@
                 color: #ddd
             }
 
-@property --glow1 {
+            @property --glow1 {
     syntax: "<color>";
     initial-value: red;
     inherits: false;
@@ -244,45 +244,46 @@
     0% {
         --glow1: #ff0000;
         --glow2: #ff7a00;
-        --glowBlur: 8px;
+        --glowBlur: 5px;
     }
 
     16% {
         --glow1: #ff7a00;
         --glow2: #ffff00;
-        --glowBlur: 9px;
+        --glowBlur: 6px;
     }
 
     33% {
         --glow1: #00ff00;
         --glow2: #00ffff;
-        --glowBlur: 10px;
+        --glowBlur: 7px;
     }
 
     50% {
         --glow1: #0080ff;
         --glow2: #7a00ff;
-        --glowBlur: 11px;
+        --glowBlur: 8px;
     }
 
     66% {
         --glow1: #ff00ff;
         --glow2: #ff007a;
-        --glowBlur: 10px;
+        --glowBlur: 7px;
     }
 
     83% {
         --glow1: #ff007a;
         --glow2: #ff0000;
-        --glowBlur: 9px;
+        --glowBlur: 6px;
     }
 
     100% {
         --glow1: #ff0000;
         --glow2: #ff7a00;
-        --glowBlur: 8px;
+        --glowBlur: 5px;
     }
 }
+            }
 .switchII {
     position: relative;
     display: inline-block;
@@ -350,7 +351,7 @@
         background-position: 300% 50%;
     }
 }
-            #inputAdvanced {
+          #inputAdvanced {
     font-family: nswui;
     color: #aaa;
     background: transparent;
@@ -424,7 +425,7 @@
             </div>
             <div id="advancedOptionsBox">
                 <div class="advancedOptionsBoxRow">
-                    <label class="switchII fileWrap">
+<label class="switchII fileWrap">
     Choose BIOS file (if required)
     <input type="file" id="inputAdvanced" />
 </label>
