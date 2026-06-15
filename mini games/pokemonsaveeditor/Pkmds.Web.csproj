@@ -1,0 +1,75 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+    <PropertyGroup>
+        <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+        <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- SIMD disabled to restore compatibility with iOS < 16.4 / Safari < 16.4.
+             Re-enable (with the SIMD probe in index.html) if perf measurements
+             justify the browser support trade-off. See issue #883. -->
+        <WasmEnableSIMD>false</WasmEnableSIMD>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <DebugType>portable</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <BlazorWasmDebuggingEnabled>true</BlazorWasmDebuggingEnabled>
+        <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
+        <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
+        <BlazorEnableCompression>false</BlazorEnableCompression>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <BlazorWebAssemblyEnableLinking>true</BlazorWebAssemblyEnableLinking>
+        <BlazorEnableCompression>true</BlazorEnableCompression>
+        <!-- Trim app code (PKHeX.Core, MudBlazor, Pkmds.Rcl) in addition to the
+             framework. Saves ~610 KB brotli; safe because:
+             - PreservePkmTypes.xml roots PKHeX's PKM type hierarchy for
+               EntityBatchEditor's reflection path
+             - Pkmds.Rcl/PreserveRoutes.xml roots Blazor's @page components
+             - PreserveJSInvokable.xml + [DynamicDependency] attributes on
+               RefreshService and EmbeddedHostBridge ctors root the [JSInvokable]
+               static entry points called via DotNet.invokeMethodAsync
+             - BankService / BackupService / EmbeddedHostBridge use source-gen
+               JSON and pass JsonDocument.RootElement (trim-safe primitive)
+               across the IJS boundary, so the reflection path through Blazor's
+               internal JsonSerializer is no longer hit
+             Initial flip in #883 broke Bank and Backup (issues #894/#896/#898);
+             re-enabled in #902 after the IJS interop and [JSInvokable] surfaces
+             were hardened. -->
+        <TrimMode>full</TrimMode>
+        <PublishTrimmed>true</PublishTrimmed>
+        <!-- AOT disabled alongside SIMD. Re-enable both together once the
+             browser compatibility impact of SIMD is better understood. -->
+        <RunAOTCompilation>false</RunAOTCompilation>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <GenerateServiceWorkerAssetsManifest>true</GenerateServiceWorkerAssetsManifest>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Pkmds.Rcl\Pkmds.Rcl.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <TrimmerRootDescriptor Include="PreservePkmTypes.xml"/>
+        <TrimmerRootDescriptor Include="PreserveJSInvokable.xml"/>
+    </ItemGroup>
+
+    <Target Name="CopyServiceWorkerPublished" AfterTargets="Publish">
+        <Copy SourceFiles="wwwroot\service-worker.published.js" DestinationFiles="$(PublishDir)wwwroot\service-worker.published.js"/>
+    </Target>
+
+</Project>

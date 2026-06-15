@@ -1,0 +1,76 @@
+// Configure Blazor WebAssembly application and services
+
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+var services = builder.Services;
+var logging = builder.Logging;
+
+// Configure Serilog with browser console sink for client-side logging
+// The level switch allows runtime control of log verbosity
+var levelSwitch = new LoggingLevelSwitch();
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.ControlledBy(levelSwitch)
+    .Enrich.FromLogContext()
+    .WriteTo.BrowserConsole()
+    .CreateLogger();
+
+logging.ClearProviders();
+logging.AddSerilog(Log.Logger, true);
+
+// Add Blazor root components
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
+
+// Configure MudBlazor UI library
+services
+    .AddMudServices(config =>
+    {
+        config.SnackbarConfiguration.PreventDuplicates = false;
+        config.SnackbarConfiguration.ClearAfterNavigation = true;
+    });
+
+// Register application services
+services
+    .AddSingleton(_ => new HttpClient { BaseAddress = new(builder.HostEnvironment.BaseAddress) })
+    .AddFileSystemAccessService() // File System Access API for loading/saving files
+    .AddSingleton<IAppState, AppState>()
+    .AddSingleton<IRefreshService, RefreshService>()
+    .AddSingleton<IAppService, AppService>()
+    .AddSingleton<IHostService, HostService>()
+    .AddSingleton<EmbeddedHostBridge>()
+    .AddSingleton<IDialogOptionsHelper, DialogOptionsHelper>()
+    .AddSingleton<IDragDropService, DragDropService>()
+    .AddSingleton<ILoggingService, LoggingService>()
+    .AddSingleton<ISettingsService, SettingsService>()
+    .AddSingleton<IHapticService, HapticService>()
+    .AddSingleton(levelSwitch)
+    .AddSingleton<JsService>()
+    .AddSingleton<BlazorAesProvider>()
+    .AddSingleton<BlazorMd5Provider>()
+    .AddSingleton<IBugReportService, BugReportService>()
+    .AddSingleton<IDescriptionService, DescriptionService>()
+    .AddSingleton<IBatchEditorService, BatchEditorService>()
+    .AddSingleton<ILegalizationService, LegalizationService>()
+    .AddSingleton<ILegalityFixService, LegalityFixService>()
+    .AddScoped<IBankService, BankService>()
+    .AddScoped<IBackupService, BackupService>();
+
+var app = builder.Build();
+
+// IMPORTANT: Replace PKHeX.Core's cryptography providers with JavaScript-based implementations
+// This is necessary because Blazor WASM doesn't support System.Security.Cryptography APIs natively.
+// We use crypto-js via JavaScript interop for AES encryption/decryption and MD5 hashing.
+RuntimeCryptographyProvider.Aes = app.Services.GetRequiredService<BlazorAesProvider>();
+RuntimeCryptographyProvider.Md5 = app.Services.GetRequiredService<BlazorMd5Provider>();
+
+// Eagerly resolve the embedded host bridge so its constructor wires up the
+// static Instance field used by [JSInvokable] static entry points. Without
+// this the bridge would only initialize on first injection, which never
+// happens in standalone mode (nothing else depends on it).
+_ = app.Services.GetRequiredService<EmbeddedHostBridge>();
+
+// Configure logging service to allow runtime changes to log level
+var loggingService = app.Services.GetRequiredService<ILoggingService>();
+loggingService.OnLoggingConfigurationChanged += level => levelSwitch.MinimumLevel = level;
+
+await app.RunAsync();
