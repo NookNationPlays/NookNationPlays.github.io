@@ -1,7 +1,7 @@
 <div align="center">
 
-<img width="300" src="docs/Logo-light.png#gh-dark-mode-only" alt="EmulatorJS Dark Mode Logo">
-<img width="300" src="docs/Logo.png#gh-light-mode-only" alt="EmulatorJS Light Mode Logo">
+<img width="300" src="docs/nnp-logo.png#gh-dark-mode-only" alt="EmulatorJS Dark Mode Logo">
+<img width="300" src="docs/nnp-logo.png#gh-light-mode-only" alt="EmulatorJS Light Mode Logo">
 
 <br>
 
@@ -25,17 +25,15 @@ Join our Discord server:
 ## Getting Started
 
 ### Supported Systems
-EmulatorJS supports a wide variety of legacy consoles and arcade machines. For the complete list of supported cores, please visit our [Cores Documentation](https://emulatorjs.org/docs4devs/cores).
+EmulatorJS+ supports a wide variety of legacy consoles and arcade machines including minigames like minecraft 1.8.8, cookie clicker, block blast, and TwiliRealm's Dusklight. For the complete list of supported cores, please visit our [Cores Documentation](https://emulatorjs.org/docs4devs/cores).
 
 ### Versioning Guide
 We use a specific versioning system to help you choose the right build for your needs:
 
-1.  **Stable** - The most current release. Both code and cores are tested before release. Updated when new versions are released on GitHub. This is the default version on the Demo.
-2.  **Latest** - Contains the latest code but uses stable cores. Updated whenever the `main` branch is updated. **This version will often be more broken than nightly**
-3.  **Nightly** - Contains the latest code and the latest cores. Cores are updated daily. **This version is not recommended for production use as it is the main development branch.**
+1.  **this one** - The only version available. This is the default version.
 
 ### CDN Integration
-EmulatorJS provides a public CDN at `https://cdn.emulatorjs.org/`. You can access any version by setting the data path and loader.js accordingly.
+EmulatorJS+ provides a public CDN at `https://cdn.emulatorjs.org/`. You can access any other version by setting the data path and loader.js accordingly.
 
 ```javascript
 // Example Configuration
@@ -44,7 +42,7 @@ const EJS_pathToData = 'https://cdn.emulatorjs.org/<version>/data/';
 ```
 
 ### Development
-To run the project locally for development:
+To run EmulatorJS+ locally for development:
 
 1.  Open a terminal in the root directory.
 2.  Install dependencies:
@@ -64,15 +62,15 @@ To run the project locally for development:
 ## Community & Support
 
 ### 3rd Party Integrations
-EmulatorJS is built as a library/plugin, not a standalone website (therefore, no Docker container). For projects that utilize EmulatorJS, check out our [3rd Party Integration List](https://emulatorjs.org/docs/3rd-party).
+EmulatorJS+ is built as a fork to the library/plugin EmulatorJS, not a standalone website (therefore, no Docker container). For projects that utilize EmulatorJS+, check out the official [3rd Party Integration List](https://emulatorjs.org/docs/3rd-party).
 
 ### Issues & Reporting
-If you encounter an issue, please open an [Issue](https://github.com/EmulatorJS/EmulatorJS/issues) on GitHub. Include as many details as possible, including your browser console logs.
+If you encounter an issue, please open an [Issue](https://github.com/EmulatorJS/EmulatorJS/issues) on GitHub. Include as many details as possible, including your browser console logs. Same here with my version, If you encounter an issue with the UI or minigames, Please open an [Issue](https://github.com/NookNationPlays/NookNationPlays.github.io/issues) or email/DM me If I know You.
 
-> **When reporting bugs, please specify the version you are using (Stable/Latest/Nightly).**
+> **When reporting bugs, please specify the version you are using (OG/My Fork/Your Fork Of My Fork/Your Fork Of OG).**
 
 ### Support the Project
-This project is free and ad-free. The demo page may show occasional ads to help with hosting costs, but you can support development directly via [Patreon][Link Patreon].
+This project is free and ad-free. normally there could be ads on the normal version but like I say, I don't pay a dime for this site so IDK really loll.
 
 ---
 
@@ -96,10 +94,9 @@ This project is free and ad-free. The demo page may show occasional ads to help 
 [Discord Badge]: https://invidget.switchblade.xyz/6akryGkETU
 
 [Link License]: LICENSE
-[Link Website]: https://emulatorjs.org/
-[Link Usage]: https://emulatorjs.org/docs/
-[Link Configurator]: https://emulatorjs.org/editor
-[Link Demo]: https://demo.emulatorjs.org/
+[Link Website]: https://youtube.com/@NookNation
+[Link Usage]: https://youtube.com/@NookNation
+[Link Configurator]: https://youtube.com/@NookNation
+[Link Demo]: https://youtube.com/@NookNation
 [Link Contributors]: docs/contributors.md
-[Link Issue]: https://github.com/emulatorjs/emulatorjs/issues
-[Link Patreon]: https://patreon.com/EmulatorJS
+[Link Issue]: https://github.com/NookNationPlays/nooknationplays.github.io/issues
