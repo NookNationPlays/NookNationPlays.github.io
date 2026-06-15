@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0"
+          name="viewport"/>
+    <title>PKMDS: Pokémon Save Editor for Web — Browser Not Supported</title>
+    <link href="icon-512.png"
+          rel="apple-touch-icon"
+          sizes="512x512"/>
+    <link href="icon-192.png"
+          rel="apple-touch-icon"
+          sizes="192x192"/>
+    <link href="icon-512.png"
+          rel="icon"
+          type="image/png"/>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem;
+            line-height: 1.6;
+            color: #1f2937;
+        }
+        h1 { margin-top: 0; }
+        ul { padding-left: 1.5rem; }
+        code {
+            background: #f3f4f6;
+            padding: 0.1em 0.35em;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+        a { color: #1E40AF; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #111827; color: #e5e7eb; }
+            code { background: #1f2937; }
+            a { color: #60A5FA; }
+        }
+    </style>
+</head>
+
+<body>
+<h1>PKMDS: Pokémon Save Editor for Web</h1>
+
+<p>
+    Your browser isn't recent enough to run PKMDS. We need
+    <a href="https://webassembly.org/" target="_blank" rel="noopener">WebAssembly</a>
+    with the <a href="https://github.com/WebAssembly/simd" target="_blank" rel="noopener">SIMD</a>
+    extension — used to accelerate save-file parsing, encryption, and legality
+    checks.
+</p>
+
+<p>Any of these (or newer) will work:</p>
+
+<ul>
+    <li>Chrome / Edge / Brave / Opera 91+ (May 2021)</li>
+    <li>Firefox 89+ (June 2021)</li>
+    <li>Safari 16.4+ on macOS, iPadOS, or iOS (March 2023)</li>
+</ul>
+
+<p>
+    If you're on an older iPhone or iPad that can't update to iOS 16.4 or
+    later, unfortunately Apple no longer ships browser updates for that
+    device and PKMDS can't run there.
+</p>
+
+<p>
+    Want the gritty details? Check
+    <a href="https://caniuse.com/wasm-simd" target="_blank" rel="noopener">caniuse.com/wasm-simd</a>.
+</p>
+
+<hr style="margin: 2rem 0; border: none; border-top: 1px solid #d1d5db;"/>
+
+<h2 style="font-size: 1.1rem;">Loading on a supported browser but still not working?</h2>
+
+<p>
+    A stale service worker cache can prevent the app from starting after an update.
+    Try these steps — they leave your save backups and Bank storage untouched:
+</p>
+
+<ol>
+    <li><strong>Hard refresh</strong> — <kbd>Ctrl+Shift+R</kbd> (Windows/Linux/ChromeOS) or <kbd>⌘⇧R</kbd> (Mac). Usually enough.</li>
+    <li>
+        <strong>Unregister the service worker</strong> — open DevTools (<kbd>F12</kbd>),
+        go to <strong>Application → Service Workers</strong>, and click <strong>Unregister</strong>
+        next to the PKMDS entry. Reload the page.
+        <br/>
+        <em>Do not use "Clear site data" — that also wipes your local backups and Bank.</em>
+    </li>
+    <li><strong>Incognito / private window</strong> — bypasses the service worker entirely to confirm the issue is cache-related.</li>
+</ol>
+
+<p>
+    If none of those help, please
+    <a href="https://github.com/codemonkey85/PKMDS-Blazor/issues" target="_blank" rel="noopener">open an issue</a>
+    and describe what you see (stuck spinner, error bar, or this page).
+</p>
+</body>
+
+</html>
