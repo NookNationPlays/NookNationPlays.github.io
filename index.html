@@ -350,6 +350,57 @@
         background-position: 300% 50%;
     }
 }
+            #inputAdvanced {
+    font-family: nswui;
+    color: #aaa;
+    background: transparent;
+    border: none;
+}
+
+/* base + hover use SAME inner color */
+#inputAdvanced::file-selector-button {
+    padding: 10px 18px;
+    margin-right: 12px;
+
+    font-family: nswui;
+    font-size: 14px;
+    color: white;
+
+    border: none;
+    border-radius: 0.5px;
+
+    cursor: pointer;
+
+    /* unified base color (same as hover inner fill) */
+    background: rgba(20, 20, 30, 0.95);
+
+    transition: all 0.2s ease;
+}
+
+/* hover only adds gradient border */
+#inputAdvanced::file-selector-button:hover {
+    background:
+        linear-gradient(rgba(20, 20, 30, 0.95), rgba(20, 20, 30, 0.95)) padding-box,
+        linear-gradient(
+            90deg,
+            #5ddcff,
+            #3c67e3,
+            #4e00c2,
+            #3c67e3,
+            #5ddcff
+        ) border-box;
+
+    border: 3px solid transparent;
+
+    background-size: 300% 100%;
+    animation: flow 8s linear infinite;
+}
+
+/* animation */
+@keyframes flow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+}
             #top {
                 margin: 5px;
             }
@@ -373,8 +424,10 @@
             </div>
             <div id="advancedOptionsBox">
                 <div class="advancedOptionsBoxRow">
-                    <input type="file" id ="inputAdvanced" title="BIOS" />
-                    <label for="inputAdvanced"> Upload BIOS file (if required)</label>
+                    <label class="switchII fileWrap">
+    Choose BIOS file (if required)
+    <input type="file" id="inputAdvanced" />
+</label>
                 </div>
                 <div class="advancedOptionsBoxRow">
                     <input type="checkbox" id="debugToggle" />
