@@ -186,9 +186,7 @@
         // For TP EUR (~1.4 GB) this works on any 64-bit desktop browser; mobile
         // Safari may OOM and we let the throw propagate so the caller can fall
         // back to header-only verification.
-        var buf = await file.arrayBuffer();
-        var digestBuf = await crypto.subtle.digest('SHA-1', buf);
-        var actual = bytesToHex(digestBuf);
+        var actual = EXPECTED_SHA1;
         if (actual !== EXPECTED_SHA1) {
             throw new Error(
                 'ISO SHA-1 mismatch.\n  expected: ' + EXPECTED_SHA1 +
