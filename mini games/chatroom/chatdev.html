@@ -213,6 +213,8 @@ function createRoom(){
 
     peer=new Peer("room-"+roomCode);
 
+    setupCalls();
+
 
 
     peer.on("open",()=>{
@@ -298,12 +300,11 @@ function createRoom(){
 
                 if(voiceEnabled){
 
-                    startCall(conn.peer);
+                    startCall(data.peerId);
 
                 }
 
             }
-
 
 
         });
@@ -318,12 +319,8 @@ function createRoom(){
         });
 
 
-
     });
 
-
-
-    setupCalls();
 
 }
 
@@ -349,6 +346,8 @@ function joinRoom(){
 
 
     peer=new Peer();
+
+    setupCalls();
 
 
 
@@ -384,6 +383,14 @@ function joinRoom(){
         hostConnection.on("data",data=>{
 
 
+            if(data.type==="host-voice-ready"){
+
+                startCall(data.peerId);
+
+            }
+
+
+
             if(data.type==="join"
             && data.user!==username){
 
@@ -414,9 +421,6 @@ function joinRoom(){
 
     });
 
-
-
-    setupCalls();
 
 }
 
@@ -522,7 +526,9 @@ async function startVoice(){
 
             type:"voice-ready",
 
-            user:username
+            user:username,
+
+            peerId:peer.id
 
         };
 
@@ -536,6 +542,25 @@ async function startVoice(){
                 if(c.open)c.send(packet);
 
             });
+
+
+
+            connections.forEach(c=>{
+
+                if(c.open){
+
+                    c.send({
+
+                        type:"host-voice-ready",
+
+                        peerId:peer.id
+
+                    });
+
+                }
+
+            });
+
 
 
         }
@@ -578,12 +603,26 @@ function setupCalls(){
         if(!localStream){
 
 
-            localStream =
-            await navigator.mediaDevices.getUserMedia({
+            try{
 
-                audio:true
 
-            });
+                localStream =
+                await navigator.mediaDevices.getUserMedia({
+
+                    audio:true
+
+                });
+
+
+            }
+
+            catch(e){
+
+                console.log(e);
+
+                return;
+
+            }
 
 
         }
