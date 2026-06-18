@@ -159,7 +159,7 @@ function createRoom(){
 
     peer.on("connection", conn => {
 
-        if(connections.length >= 2){
+        if(connections.length >= 5){
             conn.close();
             return;
         }
