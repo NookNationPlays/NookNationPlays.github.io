@@ -127,7 +127,7 @@ Not connected
 <br>
 
 <button onclick="startVoice()">
-🎤 Enable Voice
+Enable Voice
 </button>
 
 </div>
@@ -292,11 +292,15 @@ function createRoom(){
 
             if(data.type==="voice-ready"){
 
+
                 log(
                     data.user+" enabled voice.",
                     "system"
                 );
 
+
+
+                // Host calls the new person
 
                 if(voiceEnabled){
 
@@ -304,7 +308,35 @@ function createRoom(){
 
                 }
 
+
+
+                // Tell everyone else about this person
+
+                connections.forEach(c=>{
+
+
+                    if(c!==conn && c.open){
+
+
+                        c.send({
+
+                            type:"new-voice-user",
+
+                            peerId:data.peerId,
+
+                            user:data.user
+
+                        });
+
+
+                    }
+
+
+                });
+
+
             }
+
 
 
         });
@@ -381,6 +413,22 @@ function joinRoom(){
 
 
         hostConnection.on("data",data=>{
+
+
+            if(data.type==="new-voice-user"){
+
+
+                log(
+                    data.user+" enabled voice.",
+                    "system"
+                );
+
+
+                startCall(data.peerId);
+
+
+            }
+
 
 
             if(data.type==="host-voice-ready"){
@@ -544,25 +592,6 @@ async function startVoice(){
             });
 
 
-
-            connections.forEach(c=>{
-
-                if(c.open){
-
-                    c.send({
-
-                        type:"host-voice-ready",
-
-                        peerId:peer.id
-
-                    });
-
-                }
-
-            });
-
-
-
         }
 
         else{
@@ -603,26 +632,12 @@ function setupCalls(){
         if(!localStream){
 
 
-            try{
+            localStream =
+            await navigator.mediaDevices.getUserMedia({
 
+                audio:true
 
-                localStream =
-                await navigator.mediaDevices.getUserMedia({
-
-                    audio:true
-
-                });
-
-
-            }
-
-            catch(e){
-
-                console.log(e);
-
-                return;
-
-            }
+            });
 
 
         }
@@ -655,6 +670,8 @@ function startCall(id){
     if(!localStream)return;
 
 
+    if(id===peer.id)return;
+
 
     if(calledPeers.includes(id))return;
 
@@ -679,7 +696,6 @@ function startCall(id){
 
 
     });
-
 
 
 }
@@ -727,7 +743,6 @@ document
 
 
 </script>
-
 
 </body>
 </html>
