@@ -3,143 +3,293 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PeaceChat Voice</title>
+<title>PeaceChat</title>
+
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
 <style>
-body{font-family:Arial;background:#111827;color:white;padding:20px}
-.container{max-width:800px;margin:auto}
-.card{background:#1f2937;padding:15px;border-radius:10px;margin-bottom:15px}
-input,button{padding:10px;margin:4px;border:0;border-radius:6px}
-input{background:#374151;color:white}
-button{background:#2563eb;color:white;cursor:pointer}
-button:hover{background:#1d4ed8}
-#chat{height:350px;overflow:auto;background:#0f172a;padding:10px;border-radius:10px}
-.message{margin:6px}
-.system{color:#60a5fa}.self{color:#4ade80}.other{color:#facc15}
-audio{display:none}
+body{
+    font-family:Arial,sans-serif;
+    background:#111827;
+    color:white;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+}
+
+.card{
+    background:#1f2937;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+input,button{
+    padding:10px;
+    border-radius:6px;
+    border:none;
+    margin:4px;
+}
+
+input{
+    background:#374151;
+    color:white;
+}
+
+button{
+    cursor:pointer;
+    background:#2563eb;
+    color:white;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+#chat{
+    height:350px;
+    overflow-y:auto;
+    background:#0f172a;
+    border-radius:10px;
+    padding:10px;
+}
+
+.message{
+    margin:6px 0;
+    word-wrap:break-word;
+}
+
+.system{
+    color:#60a5fa;
+}
+
+.self{
+    color:#4ade80;
+}
+
+.other{
+    color:#facc15;
+}
 </style>
 </head>
 <body>
+
 <div class="container">
+
 <h1>PeaceChat</h1>
+
 <div class="card">
-<input id="username" placeholder="Username"><br>
+
+<input id="username" placeholder="Username">
+
+<br>
+
 <input id="room" placeholder="Room Code">
+
 <button onclick="createRoom()">Create Room</button>
 <button onclick="joinRoom()">Join Room</button>
+
 </div>
-<div class="card"><div id="status">Not connected</div></div>
-<div id="chat" class="card"></div>
+
 <div class="card">
-<input id="message" placeholder="Message" style="width:70%">
-<button onclick="sendMessage()">Send</button><br>
-<button onclick="startVoice()">🎤 Enable Voice</button>
+
+<div id="status">Not connected</div>
+
 </div>
-<div id="audioContainer"></div>
+
+<div id="chat" class="card"></div>
+
+<div class="card">
+
+<input id="message" placeholder="Message" style="width:75%;">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
 </div>
 
 <script>
-let peer,isHost=false,connections=[],hostConnection=null;
-let roomCode="",username="",localStream=null,voiceEnabled=false;
 
-function log(t,c="system"){
- let d=document.createElement("div");d.className="message "+c;d.textContent=t;
- chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+let peer;
+let isHost = false;
+
+let connections = [];
+let hostConnection = null;
+
+let roomCode = "";
+let username = "";
+
+function log(text, cls="system"){
+    const div = document.createElement("div");
+    div.className = "message " + cls;
+    div.textContent = text;
+
+    const chat = document.getElementById("chat");
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
 }
-function setStatus(t){status.textContent=t;}
+
+function setStatus(text){
+    document.getElementById("status").textContent = text;
+}
 
 function createRoom(){
- username=document.getElementById("username").value.trim();
- roomCode=document.getElementById("room").value.trim();
- if(!username||!roomCode)return alert("Enter username and room code.");
- isHost=true; peer=new Peer("room-"+roomCode);
 
- peer.on("open",()=>{setStatus("Hosting room: "+roomCode);log("Room created.");});
+    username = document.getElementById("username").value.trim();
+    roomCode = document.getElementById("room").value.trim();
 
- peer.on("connection",conn=>{
-  if(connections.length>=5){conn.close();return;}
-  connections.push(conn);
-  conn.on("data",data=>{
-   if(data.type=="chat"){
-    log(data.user+": "+data.text,"other");
-    connections.forEach(c=>{if(c!==conn&&c.open)c.send(data);});
-   }
-   if(data.type=="join"){
-    log(data.user+" joined.");
-    connections.forEach(c=>{if(c.open)c.send(data);});
-   }
-  });
-  conn.on("close",()=>connections=connections.filter(c=>c!==conn));
- });
+    if(!username || !roomCode){
+        alert("Enter username and room code.");
+        return;
+    }
 
- peer.on("call",call=>{
-  call.answer(localStream||undefined);
-  call.on("stream",addAudio);
- });
+    isHost = true;
+
+    peer = new Peer("room-" + roomCode);
+
+    peer.on("open", () => {
+        setStatus("Hosting room: " + roomCode);
+        log("Room created.", "system");
+    });
+
+    peer.on("connection", conn => {
+
+        if(connections.length >= 5){
+            conn.close();
+            return;
+        }
+
+        connections.push(conn);
+
+        conn.on("data", data => {
+
+            if(data.type === "chat"){
+
+                log(data.user + ": " + data.text, "other");
+
+                connections.forEach(c => {
+                    if(c !== conn && c.open){
+                        c.send(data);
+                    }
+                });
+
+            }
+
+            if(data.type === "join"){
+
+                log(data.user + " joined.", "system");
+
+                connections.forEach(c => {
+                    if(c.open){
+                        c.send(data);
+                    }
+                });
+            }
+
+        });
+
+        conn.on("close", () => {
+            connections = connections.filter(c => c !== conn);
+        });
+
+    });
+
 }
 
 function joinRoom(){
- username=document.getElementById("username").value.trim();
- roomCode=document.getElementById("room").value.trim();
- if(!username||!roomCode)return alert("Enter username and room code.");
- peer=new Peer();
- peer.on("open",()=>{
-  hostConnection=peer.connect("room-"+roomCode);
-  hostConnection.on("open",()=>{
-   setStatus("Connected to room: "+roomCode);
-   hostConnection.send({type:"join",user:username});
-  });
-  hostConnection.on("data",data=>{
-   if(data.type=="join"&&data.user!==username)log(data.user+" joined.");
-   if(data.type=="chat"&&data.user!==username)log(data.user+": "+data.text,"other");
-  });
- });
- peer.on("call",call=>{
-  call.answer(localStream||undefined);
-  call.on("stream",addAudio);
- });
+
+    username = document.getElementById("username").value.trim();
+    roomCode = document.getElementById("room").value.trim();
+
+    if(!username || !roomCode){
+        alert("Enter username and room code.");
+        return;
+    }
+
+    peer = new Peer();
+
+    peer.on("open", () => {
+
+        hostConnection = peer.connect("room-" + roomCode);
+
+        hostConnection.on("open", () => {
+
+            setStatus("Connected to room: " + roomCode);
+
+            hostConnection.send({
+                type:"join",
+                user:username
+            });
+
+        });
+
+        hostConnection.on("data", data => {
+
+            if(data.type === "join"){
+                if(data.user !== username){
+                    log(data.user + " joined.", "system");
+                }
+            }
+
+            if(data.type === "chat"){
+                if(data.user !== username){
+                    log(data.user + ": " + data.text, "other");
+                }
+            }
+
+        });
+
+    });
+
 }
 
 function sendMessage(){
- let box=document.getElementById("message");
- let text=box.value.trim(); if(!text)return;
- log(username+": "+text,"self");
- let p={type:"chat",user:username,text:text};
- if(isHost)connections.forEach(c=>{if(c.open)c.send(p);});
- else if(hostConnection&&hostConnection.open)hostConnection.send(p);
- box.value="";
+
+    const box = document.getElementById("message");
+    const text = box.value.trim();
+
+    if(!text) return;
+
+    log(username + ": " + text, "self");
+
+    const packet = {
+        type:"chat",
+        user:username,
+        text:text
+    };
+
+    if(isHost){
+
+        connections.forEach(conn => {
+            if(conn.open){
+                conn.send(packet);
+            }
+        });
+
+    } else {
+
+        if(hostConnection && hostConnection.open){
+            hostConnection.send(packet);
+        }
+
+    }
+
+    box.value = "";
+
 }
 
-async function startVoice(){
- if(voiceEnabled)return;
- try{
-  localStream=await navigator.mediaDevices.getUserMedia({audio:true});
-  voiceEnabled=true;
-  log("Voice enabled.");
-  if(isHost){
-   connections.forEach(c=>makeCall(c.peer));
-  }else{
-   makeCall("room-"+roomCode);
-  }
- }catch(e){alert("Microphone permission denied.");}
-}
-
-function makeCall(id){
- if(!localStream)return;
- let call=peer.call(id,localStream);
- call.on("stream",addAudio);
-}
-
-function addAudio(stream){
- let a=document.createElement("audio");
- a.autoplay=true;
- a.srcObject=stream;
- document.getElementById("audioContainer").appendChild(a);
-}
-
-document.getElementById("message").addEventListener("keypress",e=>{
- if(e.key==="Enter")sendMessage();
+document.getElementById("message").addEventListener("keypress", e => {
+    if(e.key === "Enter"){
+        sendMessage();
+    }
 });
+
 </script>
+
 </body>
 </html>
