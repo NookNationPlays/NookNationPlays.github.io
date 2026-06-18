@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PeaceChat</title>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#111827;
+    color:white;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+}
+
+.card{
+    background:#1f2937;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+input,button{
+    padding:10px;
+    border-radius:6px;
+    border:none;
+    margin:4px;
+}
+
+input{
+    background:#374151;
+    color:white;
+}
+
+button{
+    cursor:pointer;
+    background:#2563eb;
+    color:white;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+#chat{
+    height:350px;
+    overflow-y:auto;
+    background:#0f172a;
+    border-radius:10px;
+    padding:10px;
+}
+
+.message{
+    margin:6px 0;
+    word-wrap:break-word;
+}
+
+.system{
+    color:#60a5fa;
+}
+
+.self{
+    color:#4ade80;
+}
+
+.other{
+    color:#facc15;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>PeaceChat</h1>
+
+<div class="card">
+
+<input id="username" placeholder="Username">
+
+<br>
+
+<input id="room" placeholder="Room Code">
+
+<button onclick="createRoom()">Create Room</button>
+<button onclick="joinRoom()">Join Room</button>
+
+</div>
+
+<div class="card">
+
+<div id="status">Not connected</div>
+
+</div>
+
+<div id="chat" class="card"></div>
+
+<div class="card">
+
+<input id="message" placeholder="Message" style="width:75%;">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+</div>
+
+<script>
+
+let peer;
+let isHost = false;
+
+let connections = [];
+let hostConnection = null;
+
+let roomCode = "";
+let username = "";
+
+function log(text, cls="system"){
+    const div = document.createElement("div");
+    div.className = "message " + cls;
+    div.textContent = text;
+
+    const chat = document.getElementById("chat");
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function setStatus(text){
+    document.getElementById("status").textContent = text;
+}
+
+function createRoom(){
+
+    username = document.getElementById("username").value.trim();
+    roomCode = document.getElementById("room").value.trim();
+
+    if(!username || !roomCode){
+        alert("Enter username and room code.");
+        return;
+    }
+
+    isHost = true;
+
+    peer = new Peer("room-" + roomCode);
+
+    peer.on("open", () => {
+        setStatus("Hosting room: " + roomCode);
+        log("Room created.", "system");
+    });
+
+    peer.on("connection", conn => {
+
+        if(connections.length >= 2){
+            conn.close();
+            return;
+        }
+
+        connections.push(conn);
+
+        conn.on("data", data => {
+
+            if(data.type === "chat"){
+
+                log(data.user + ": " + data.text, "other");
+
+                connections.forEach(c => {
+                    if(c !== conn && c.open){
+                        c.send(data);
+                    }
+                });
+
+            }
+
+            if(data.type === "join"){
+
+                log(data.user + " joined.", "system");
+
+                connections.forEach(c => {
+                    if(c.open){
+                        c.send(data);
+                    }
+                });
+            }
+
+        });
+
+        conn.on("close", () => {
+            connections = connections.filter(c => c !== conn);
+        });
+
+    });
+
+}
+
+function joinRoom(){
+
+    username = document.getElementById("username").value.trim();
+    roomCode = document.getElementById("room").value.trim();
+
+    if(!username || !roomCode){
+        alert("Enter username and room code.");
+        return;
+    }
+
+    peer = new Peer();
+
+    peer.on("open", () => {
+
+        hostConnection = peer.connect("room-" + roomCode);
+
+        hostConnection.on("open", () => {
+
+            setStatus("Connected to room: " + roomCode);
+
+            hostConnection.send({
+                type:"join",
+                user:username
+            });
+
+        });
+
+        hostConnection.on("data", data => {
+
+            if(data.type === "join"){
+                if(data.user !== username){
+                    log(data.user + " joined.", "system");
+                }
+            }
+
+            if(data.type === "chat"){
+                if(data.user !== username){
+                    log(data.user + ": " + data.text, "other");
+                }
+            }
+
+        });
+
+    });
+
+}
+
+function sendMessage(){
+
+    const box = document.getElementById("message");
+    const text = box.value.trim();
+
+    if(!text) return;
+
+    log(username + ": " + text, "self");
+
+    const packet = {
+        type:"chat",
+        user:username,
+        text:text
+    };
+
+    if(isHost){
+
+        connections.forEach(conn => {
+            if(conn.open){
+                conn.send(packet);
+            }
+        });
+
+    } else {
+
+        if(hostConnection && hostConnection.open){
+            hostConnection.send(packet);
+        }
+
+    }
+
+    box.value = "";
+
+}
+
+document.getElementById("message").addEventListener("keypress", e => {
+    if(e.key === "Enter"){
+        sendMessage();
+    }
+});
+
+</script>
+
+</body>
+</html>
