@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>GameChat v5</title>
+<title>GameChat v7</title>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
@@ -150,6 +150,20 @@ audio{
     margin-top:5px;
 }
 
+#videoContainer{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+#videoContainer video{
+    width:320px;
+    aspect-ratio:16/9;
+    background:black;
+    border-radius:10px;
+    object-fit:cover;
+}
+
 </style>
 </head>
 
@@ -198,6 +212,10 @@ Not connected
 Enable Voice
 </button>
 
+<button class="switchIII" onclick="startCamera()">
+Enable Camera
+</button>
+
 </div>
 
 
@@ -209,6 +227,13 @@ Enable Voice
 
 </div>
 
+<div class="card">
+
+<h3>Video</h3>
+
+<div id="videoContainer"></div>
+
+</div>
 
 </div>
 
@@ -231,6 +256,12 @@ let localStream=null;
 let voiceEnabled=false;
 
 let calledPeers=[];
+
+let videoStream = null;
+
+let videoEnabled = false;
+
+let calledVideoPeers = [];
 
 
 
@@ -688,7 +719,53 @@ async function startVoice(){
 }
 
 
+async function startCamera(){
 
+    if(videoEnabled) return;
+
+    try{
+
+        videoStream =
+        await navigator.mediaDevices.getUserMedia({
+
+            video:{
+                width:{ideal:1280},
+                height:{ideal:720}
+            }
+
+        });
+
+        videoEnabled = true;
+
+        addVideo(videoStream,true);
+
+        log("Camera enabled.");
+
+        let packet={
+            type:"camera-ready",
+            user:username,
+            peerId:peer.id
+        };
+
+        if(isHost){
+
+            connections.forEach(c=>{
+                if(c.open)c.send(packet);
+            });
+
+        }else{
+
+            hostConnection.send(packet);
+
+        }
+
+    }catch(e){
+
+        alert("Camera permission denied.");
+
+    }
+
+}
 
 
 function setupCalls(){
@@ -793,7 +870,24 @@ function addAudio(stream){
 
 }
 
+function addVideo(stream,isLocal=false){
 
+    let video=document.createElement("video");
+
+    video.autoplay=true;
+    video.playsInline=true;
+
+    if(isLocal){
+        video.muted=true;
+    }
+
+    video.srcObject=stream;
+
+    document
+        .getElementById("videoContainer")
+        .appendChild(video);
+
+}
 
 
 
