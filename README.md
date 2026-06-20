@@ -97,6 +97,6 @@ This project is free and ad-free. normally there could be ads on the normal vers
 [Link Website]: https://youtube.com/@NookNation
 [Link Usage]: https://youtube.com/@NookNation
 [Link Configurator]: https://youtube.com/@NookNation
-[Link Demo]: https://youtube.com/@NookNation
+[Link Demo]: nooknationplays.github.io
 [Link Contributors]: docs/contributors.md
 [Link Issue]: https://github.com/NookNationPlays/nooknationplays.github.io/issues
