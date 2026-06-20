@@ -437,6 +437,40 @@ function createRoom(){
             }
 
 
+            if(data.type==="camera-ready"){
+
+    log(
+        data.user+" enabled camera.",
+        "system"
+    );
+
+
+    if(videoEnabled){
+
+        startVideoCall(data.peerId);
+
+    }
+
+
+    connections.forEach(c=>{
+
+        if(c!==conn && c.open){
+
+            c.send({
+
+                type:"new-camera-user",
+
+                peerId:data.peerId,
+
+                user:data.user
+
+            });
+
+        }
+
+    });
+
+}        
 
         });
 
@@ -536,7 +570,16 @@ function joinRoom(){
 
             }
 
-
+            if(data.type==="new-camera-user"){
+            log(
+                data.user+" enabled camera.",
+                "system"
+            );
+                        
+            startVideoCall(data.peerId);
+            
+            }
+            
 
             if(data.type==="join"
             && data.user!==username){
@@ -770,35 +813,65 @@ async function startCamera(){
 
 function setupCalls(){
 
-
     peer.on("call",async call=>{
 
 
-        if(!localStream){
+        if(call.metadata==="video"){
 
 
-            localStream =
-            await navigator.mediaDevices.getUserMedia({
+            if(!videoStream){
 
-                audio:true
+                videoStream =
+                await navigator.mediaDevices.getUserMedia({
+
+                    video:{
+                        width:{ideal:1280},
+                        height:{ideal:720}
+                    }
+
+                });
+
+            }
+
+
+            call.answer(videoStream);
+
+
+            call.on("stream",stream=>{
+
+                addVideo(stream);
 
             });
 
 
         }
 
+        else{
 
 
-        call.answer(localStream);
+            if(!localStream){
+
+                localStream =
+                await navigator.mediaDevices.getUserMedia({
+
+                    audio:true
+
+                });
+
+            }
 
 
+            call.answer(localStream);
 
-        call.on("stream",stream=>{
 
-            addAudio(stream);
+            call.on("stream",stream=>{
 
-        });
+                addAudio(stream);
 
+            });
+
+
+        }
 
 
     });
@@ -845,7 +918,39 @@ function startCall(id){
 
 }
 
+function startVideoCall(id){
 
+    if(!videoStream)return;
+
+
+    if(id===peer.id)return;
+
+
+    if(calledVideoPeers.includes(id))return;
+
+
+    calledVideoPeers.push(id);
+
+
+
+    let call =
+    peer.call(
+        id,
+        videoStream,
+        {
+            metadata:"video"
+        }
+    );
+
+
+    call.on("stream",stream=>{
+
+        addVideo(stream);
+
+    });
+
+
+}
 
 
 
