@@ -1,816 +1,176 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>GameChat v5</title>
-
+<title>GameChat v6</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-
 <style>
-            @font-face {
-                font-family: 'nswui';
-                src: url('../../nswui.ttf') format('truetype');
-                font-display: swap;
-            }
-            .switchIII {
-                appearance: none;
-    position: relative;
-    display: inline-block;
-    padding: 10px 18px;
-
-    color: white;
-    font-family: nswui;
-    font-size: 14px;
-    text-decoration: none;
-
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 0.5px;
-    border: none;
-
-    z-index: 1;
-}
-
-.switchIII::before {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
-
-    /* smooth cyclic gradient (no harsh repeat point) */
-    background: linear-gradient(
-        90deg,
-        #5ddcff,
-        #3c67e3,
-        #4e00c2,
-        #3c67e3,
-        #5ddcff
-    );
-
-    background-size: 300% 100%;
-    background-position: 0% 50%;
-
-    opacity: 0;
-    transition: opacity 0.2s ease;
-
-    z-index: -1;
-
-    animation: flow 8s linear infinite;
-}
-
-.switchIII::after {
-    content: "";
-    position: absolute;
-    inset: 2px;
-    border-radius: inherit;
-
-    background: rgba(20, 20, 30, 0.95);
-
-    z-index: -1;
-}
-
-.switchIII:hover::before {
-    opacity: 1;
-}
-
-@keyframes flow {
-    0% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 300% 50%;
-    }
-}
-    
-body{
-    font-family: nswui;
-    background:#111827;
-    color:white;
-    margin:0;
-    padding:20px;
-}
-
-.container{
-    max-width:800px;
-    margin:auto;
-}
-
-.card{
-    background:#1f2937;
-    padding:15px;
-    border-radius:10px;
-    margin-bottom:15px;
-}
-
-input,button{
-    padding:10px;
-    border-radius:6px;
-    border:none;
-    margin:4px;
-}
-
-input{
-    background:#374151;
-    color:white;
-}
-
-button{
-    cursor:pointer;
-    border:none;
-}
-
-#chat{
-    height:350px;
-    overflow-y:auto;
-    background:#0f172a;
-    padding:10px;
-    border-radius:10px;
-}
-
-.message{
-    margin:6px 0;
-    word-wrap:break-word;
-}
-
-.system{
-    color:#60a5fa;
-}
-
-.self{
-    color:#4ade80;
-}
-
-.other{
-    color:#facc15;
-}
-
-audio{
-    width:100%;
-    margin-top:5px;
-}
-
+@font-face{font-family:nswui;src:url("../../nswui.ttf")}
+body{font-family:nswui,Arial;background:#111827;color:white;padding:20px}
+.card{background:#1f2937;padding:15px;border-radius:10px;margin:10px}
+button{padding:10px;margin:4px;background:#2563eb;color:white;border:0;border-radius:6px;cursor:pointer}
+input{padding:10px;background:#374151;color:white;border:0;border-radius:6px}
+#chat{height:250px;overflow:auto;background:#0f172a;padding:10px}
+video{width:320px;aspect-ratio:16/9;background:black;border-radius:10px}
 </style>
 </head>
-
 <body>
-
-<div class="container">
-
-<h1>GameChat</h1>
-
+<h1>GameChat v6</h1>
 
 <div class="card">
-
 <input id="username" placeholder="Username">
-
-<br>
-
 <input id="room" placeholder="Room Code">
-
-<button class="switchIII" onclick="createRoom()">Create Room</button>
-<button class="switchIII" onclick="joinRoom()">Join Room</button>
-
+<button onclick="createRoom()">Create</button>
+<button onclick="joinRoom()">Join</button>
 </div>
 
+<div class="card" id="status">Not connected</div>
+
+<div class="card" id="chat"></div>
 
 <div class="card">
-
-<div id="status">
-Not connected
+<input id="msg" placeholder="Message">
+<button onclick="sendMessage()">Send</button><br>
+<button onclick="enableVoice()">Enable Voice</button>
+<button onclick="enableCamera()">Enable Camera</button>
 </div>
-
-</div>
-
-
-<div id="chat" class="card"></div>
-
 
 <div class="card">
-
-<input id="message" placeholder="Message" style="width:70%">
-
-<button class="switchIII" onclick="sendMessage()">Send</button>
-
-<br>
-
-<button class="switchIII" onclick="startVoice()">
-Enable Voice
-</button>
-
+<h3>Video</h3>
+<div id="videos"></div>
 </div>
-
-
-<div class="card">
-
-<h3>Voice</h3>
-
-<div id="audioContainer"></div>
-
-</div>
-
-
-</div>
-
 
 <script>
-
-let peer;
-
-let isHost=false;
-
+let peer,isHost=false,hostConnection;
 let connections=[];
+let username="",room="";
+let audioStream=null,videoStream=null;
+let voice=false,camera=false;
+let calledAudio=[],calledVideo=[];
 
-let hostConnection=null;
-
-let roomCode="";
-let username="";
-
-let localStream=null;
-
-let voiceEnabled=false;
-
-let calledPeers=[];
-
-
-
-function log(text,cls="system"){
-
-    let div=document.createElement("div");
-
-    div.className="message "+cls;
-
-    div.textContent=text;
-
-    let chat=document.getElementById("chat");
-
-    chat.appendChild(div);
-
-    chat.scrollTop=chat.scrollHeight;
-
+function log(t){
+ let d=document.createElement("div");
+ d.textContent=t;
+ chat.appendChild(d);
+ chat.scrollTop=chat.scrollHeight;
 }
-
-
-
-function setStatus(text){
-
-    document.getElementById("status").textContent=text;
-
-}
-
-
 
 function createRoom(){
-
-    username=document.getElementById("username").value.trim();
-
-    roomCode=document.getElementById("room").value.trim();
-
-
-    if(!username||!roomCode){
-
-        alert("Enter username and room code.");
-
-        return;
-
-    }
-
-
-    isHost=true;
-
-
-    peer=new Peer("room-"+roomCode);
-
-    setupCalls();
-
-
-
-    peer.on("open",()=>{
-
-        setStatus("Hosting room: "+roomCode);
-
-        log("Room created.");
-
-    });
-
-
-
-    peer.on("connection",conn=>{
-
-
-        if(connections.length>=5){
-
-            conn.close();
-
-            return;
-
-        }
-
-
-        connections.push(conn);
-
-
-
-        conn.on("data",data=>{
-
-
-            if(data.type==="chat"){
-
-                log(
-                    data.user+": "+data.text,
-                    "other"
-                );
-
-
-                connections.forEach(c=>{
-
-                    if(c!==conn && c.open){
-
-                        c.send(data);
-
-                    }
-
-                });
-
-            }
-
-
-
-            if(data.type==="join"){
-
-                log(
-                    data.user+" joined.",
-                    "system"
-                );
-
-
-                connections.forEach(c=>{
-
-                    if(c.open){
-
-                        c.send(data);
-
-                    }
-
-                });
-
-            }
-
-
-
-            if(data.type==="voice-ready"){
-
-
-                log(
-                    data.user+" enabled voice.",
-                    "system"
-                );
-
-
-
-                // Host calls the new person
-
-                if(voiceEnabled){
-
-                    startCall(data.peerId);
-
-                }
-
-
-
-                // Tell everyone else about this person
-
-                connections.forEach(c=>{
-
-
-                    if(c!==conn && c.open){
-
-
-                        c.send({
-
-                            type:"new-voice-user",
-
-                            peerId:data.peerId,
-
-                            user:data.user
-
-                        });
-
-
-                    }
-
-
-                });
-
-
-            }
-
-
-
-        });
-
-
-
-        conn.on("close",()=>{
-
-            connections =
-            connections.filter(c=>c!==conn);
-
-        });
-
-
-    });
-
-
+ username=usernameInput.value.trim(); room=roomInput.value.trim();
+ if(!username||!room)return;
+ isHost=true;
+ peer=new Peer("room-"+room);
+ setupCalls();
+ peer.on("open",()=>status.textContent="Hosting "+room);
+ peer.on("connection",addConnection);
 }
-
-
-
 
 function joinRoom(){
-
-    username=document.getElementById("username").value.trim();
-
-    roomCode=document.getElementById("room").value.trim();
-
-
-
-    if(!username||!roomCode){
-
-        alert("Enter username and room code.");
-
-        return;
-
-    }
-
-
-
-    peer=new Peer();
-
-    setupCalls();
-
-
-
-    peer.on("open",()=>{
-
-
-        hostConnection =
-        peer.connect("room-"+roomCode);
-
-
-
-        hostConnection.on("open",()=>{
-
-
-            setStatus(
-                "Connected to room: "+roomCode
-            );
-
-
-            hostConnection.send({
-
-                type:"join",
-
-                user:username
-
-            });
-
-
-        });
-
-
-
-        hostConnection.on("data",data=>{
-
-
-            if(data.type==="new-voice-user"){
-
-
-                log(
-                    data.user+" enabled voice.",
-                    "system"
-                );
-
-
-                startCall(data.peerId);
-
-
-            }
-
-
-
-            if(data.type==="host-voice-ready"){
-
-                startCall(data.peerId);
-
-            }
-
-
-
-            if(data.type==="join"
-            && data.user!==username){
-
-                log(
-                    data.user+" joined.",
-                    "system"
-                );
-
-            }
-
-
-
-            if(data.type==="chat"
-            && data.user!==username){
-
-                log(
-                    data.user+": "+data.text,
-                    "other"
-                );
-
-            }
-
-
-
-        });
-
-
-
-    });
-
-
+ username=usernameInput.value.trim(); room=roomInput.value.trim();
+ peer=new Peer();
+ setupCalls();
+ peer.on("open",()=>{
+  hostConnection=peer.connect("room-"+room);
+  hostConnection.on("open",()=>{
+   status.textContent="Connected";
+   hostConnection.send({type:"join",user:username});
+  });
+  hostConnection.on("data",handleData);
+ });
 }
 
+function addConnection(c){
+ connections.push(c);
+ c.on("data",d=>handleData(d,c));
+}
 
-
+function handleData(d,c){
+ if(d.type=="chat"){
+  log(d.user+": "+d.text);
+  if(isHost)connections.forEach(x=>x.send(d));
+ }
+ if(d.type=="join"){
+  log(d.user+" joined");
+ }
+ if(d.type=="voice"){
+  if(voice)callPeer(d.id,"audio");
+  connections.forEach(x=>x.send(d));
+ }
+ if(d.type=="camera"){
+  if(camera)callPeer(d.id,"video");
+  connections.forEach(x=>x.send(d));
+ }
+}
 
 function sendMessage(){
-
-
-    let box=document.getElementById("message");
-
-    let text=box.value.trim();
-
-
-    if(!text)return;
-
-
-
-    log(
-        username+": "+text,
-        "self"
-    );
-
-
-
-    let packet={
-
-        type:"chat",
-
-        user:username,
-
-        text:text
-
-    };
-
-
-
-    if(isHost){
-
-
-        connections.forEach(c=>{
-
-            if(c.open)c.send(packet);
-
-        });
-
-
-    }
-
-    else{
-
-
-        if(hostConnection && hostConnection.open){
-
-            hostConnection.send(packet);
-
-        }
-
-    }
-
-
-
-    box.value="";
-
-
+ let t=msg.value.trim(); if(!t)return;
+ log(username+": "+t);
+ let d={type:"chat",user:username,text:t};
+ if(isHost)connections.forEach(c=>c.send(d));
+ else hostConnection.send(d);
+ msg.value="";
 }
 
-
-
-
-
-async function startVoice(){
-
-
-    if(voiceEnabled)return;
-
-
-
-    try{
-
-
-        localStream =
-        await navigator.mediaDevices.getUserMedia({
-
-            audio:true
-
-        });
-
-
-
-        voiceEnabled=true;
-
-
-
-        log(
-            "Voice enabled.",
-            "system"
-        );
-
-
-
-        let packet={
-
-            type:"voice-ready",
-
-            user:username,
-
-            peerId:peer.id
-
-        };
-
-
-
-        if(isHost){
-
-
-            connections.forEach(c=>{
-
-                if(c.open)c.send(packet);
-
-            });
-
-
-        }
-
-        else{
-
-
-            hostConnection.send(packet);
-
-
-        }
-
-
-
-    }
-
-    catch(e){
-
-
-        alert(
-            "Microphone permission denied."
-        );
-
-
-    }
-
-
+async function enableVoice(){
+ if(voice)return;
+ audioStream=await navigator.mediaDevices.getUserMedia({audio:true});
+ voice=true;
+ let d={type:"voice",id:peer.id};
+ if(isHost)connections.forEach(c=>c.send(d)); else hostConnection.send(d);
+ log("Voice enabled");
 }
 
-
-
-
+async function enableCamera(){
+ if(camera)return;
+ videoStream=await navigator.mediaDevices.getUserMedia({
+  video:{width:{ideal:1280},height:{ideal:720}}
+ });
+ camera=true;
+ showVideo(videoStream,true);
+ let d={type:"camera",id:peer.id};
+ if(isHost)connections.forEach(c=>c.send(d)); else hostConnection.send(d);
+ log("Camera enabled");
+}
 
 function setupCalls(){
-
-
-    peer.on("call",async call=>{
-
-
-        if(!localStream){
-
-
-            localStream =
-            await navigator.mediaDevices.getUserMedia({
-
-                audio:true
-
-            });
-
-
-        }
-
-
-
-        call.answer(localStream);
-
-
-
-        call.on("stream",stream=>{
-
-            addAudio(stream);
-
-        });
-
-
-
-    });
-
-
+ peer.on("call",call=>{
+  call.answer(call.metadata=="video"?videoStream:audioStream);
+  call.on("stream",s=>{
+   if(call.metadata=="video")showVideo(s,false);
+   else{
+    let a=new Audio();
+    a.srcObject=s;a.autoplay=true;
+    document.body.appendChild(a);
+   }
+  });
+ });
 }
 
-
-
-
-function startCall(id){
-
-
-    if(!localStream)return;
-
-
-    if(id===peer.id)return;
-
-
-    if(calledPeers.includes(id))return;
-
-
-
-    calledPeers.push(id);
-
-
-
-    let call =
-    peer.call(
-        id,
-        localStream
-    );
-
-
-
-    call.on("stream",stream=>{
-
-
-        addAudio(stream);
-
-
-    });
-
-
+function callPeer(id,type){
+ let stream=type=="video"?videoStream:audioStream;
+ if(!stream)return;
+ let call=peer.call(id,stream,{metadata:type});
+ call.on("stream",s=>{
+  if(type=="video")showVideo(s,false);
+  else{
+   let a=new Audio();
+   a.srcObject=s;a.autoplay=true;
+   document.body.appendChild(a);
+  }
+ });
 }
 
-
-
-
-
-function addAudio(stream){
-
-
-    let audio=document.createElement("audio");
-
-
-    audio.autoplay=true;
-
-    audio.controls=true;
-
-    audio.srcObject=stream;
-
-
-
-    document
-    .getElementById("audioContainer")
-    .appendChild(audio);
-
-
+function showVideo(s,local){
+ let v=document.createElement("video");
+ v.autoplay=true;
+ v.playsInline=true;
+ v.muted=local;
+ v.srcObject=s;
+ videos.appendChild(v);
 }
 
-
-
-
-
-document
-.getElementById("message")
-.addEventListener("keypress",e=>{
-
-    if(e.key==="Enter"){
-
-        sendMessage();
-
-    }
-
-});
-
-
+let usernameInput=document.getElementById("username");
+let roomInput=document.getElementById("room");
 </script>
-
 </body>
 </html>
