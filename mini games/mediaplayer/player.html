@@ -170,7 +170,7 @@ body{
         background-position: 300% 50%;
     }
 }
-          #inputAdvanced {
+          #fileInput {
     font-family: nswui;
     color: #aaa;
     background: transparent;
@@ -178,7 +178,7 @@ body{
 }
 
 /* base + hover use SAME inner color */
-#inputAdvanced::file-selector-button {
+#fileInput::file-selector-button {
     padding: 10px 18px;
     margin-right: 12px;
 
@@ -198,7 +198,7 @@ body{
 }
 
 /* hover only adds gradient border */
-#inputAdvanced::file-selector-button:hover {
+#fileInput::file-selector-button:hover {
     background:
         linear-gradient(rgba(20, 20, 30, 0.95), rgba(20, 20, 30, 0.95)) padding-box,
         linear-gradient(
@@ -248,8 +248,11 @@ body{
     <button class="switchIII" onclick="playVideo()">Play</button>
     <button class="switchIII" onclick="pauseVideo()">Pause</button>
     <button class="switchIII" onclick="stopVideo()">Stop</button>
-    
+
+    <label class="switchII fileWrap">
     <input type="file" id="fileInput" accept="video/*">
+</label>
+    
 </div>
 
 <script>
